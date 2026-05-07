@@ -5,12 +5,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scripts'))
 
 import time
 from scripts.config import WAIT_TIME_SECONDS
-from scripts.create_ec2 import create_ec2
-from scripts.delete_ec2 import delete_ec2
-from scripts.create_s3 import create_s3
-from scripts.delete_s3 import delete_s3
-from scripts.create_lambda import create_lambda
-from scripts.delete_lambda import delete_lambda
+from scripts.ec2.create_ec2 import create_ec2
+from scripts.ec2.delete_ec2 import delete_ec2
+from scripts.s3.create_s3 import create_s3
+from scripts.s3.delete_s3 import delete_s3
+from scripts.aws_lambda.create_lambda import create_lambda
+from scripts.aws_lambda.delete_lambda import delete_lambda
 from scripts.logger import setup_logger
 from scripts.email_alert import send_email
 

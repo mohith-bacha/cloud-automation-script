@@ -19,7 +19,7 @@ It is designed with DevOps best practices in mind, featuring targeted tear-downs
 - **`scripts/config.py`** - Centralized configuration variables (Region, AMI IDs, IAM Roles, Admin Email).
 - **`scripts/email_alert.py`** - Handles AWS SNS integrations for administrator notifications.
 - **`scripts/logger.py`** - Dual-stream logging setup (outputs to terminal and writes to file).
-- **`scripts/create_*.py`** & **`scripts/delete_*.py`** - Modular components isolating the boto3 logic for individual AWS resources.
+- **`scripts/ec2/`**, **`scripts/s3/`**, & **`scripts/aws_lambda/`** - Modular Python sub-packages isolating the `boto3` creation and deletion logic for their respective AWS resources.
 - **`docs/cron_setup.md`** - Comprehensive instructions on deploying the project in a Linux scheduled environment.
 
 ## Installation
