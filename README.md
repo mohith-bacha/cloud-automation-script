@@ -39,19 +39,31 @@ aws configure
 ## Usage Guide
 
 ### Standard Execution
-Run the full provisioning lifecycle (Create -> Wait -> Delete):
+Run the full provisioning lifecycle (Create all resources -> Wait -> Delete all):
 ```bash
 python run_automation.py
 ```
 
-### Custom Wait Times
-Override the default sleep interval between creation and deletion:
+### Target Specific Resource Creation
+If you only want to provision a specific service (instead of all three), you can use targeted flags:
 ```bash
+python run_automation.py --ec2
+python run_automation.py --s3
+python run_automation.py --lambda-func
+```
+
+### Custom Wait Times
+You can override the default sleep interval by providing a number of seconds, OR provide a specific clock time to calculate exactly when to execute the deletion step:
+```bash
+# Wait for 60 seconds before deleting
 python run_automation.py --wait 60
+
+# Wait until exactly 2:07 PM (14:07) before deleting
+python run_automation.py --wait 14:07
 ```
 
 ### Targeted Deletion
-Bypass creation and immediately destroy specific existing resources:
+Bypass creation entirely and immediately destroy specific existing resources:
 ```bash
 python run_automation.py --terminate-ec2 i-1234567890abcdef0
 python run_automation.py --delete-s3 my-bucket-name
@@ -61,14 +73,14 @@ python run_automation.py --delete-lambda my-function-name
 ### Background Scheduling
 Instruct the script to run continuously in the background and execute at a specific clock time every day:
 ```bash
-# Defaults to 11:00 AM
+# Start every day at 11:00 AM (default)
 python run_automation.py --schedule
 
-# Run every day at 10:30 AM
+# Start every day at 10:30 AM
 python run_automation.py --schedule 10:30
 
-# Combine schedule with a custom sleep interval
-python run_automation.py --schedule 10:30 --wait 120
+# Advanced Combo: Start every day at 2:05 PM (14:05), and trigger cleanup exactly at 2:07 PM (14:07)
+python run_automation.py --schedule 14:05 --wait 14:07
 ```
 
 ## Logs
