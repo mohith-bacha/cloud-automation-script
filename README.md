@@ -1,60 +1,75 @@
-# AWS Cloud Automation Project
+# AWS Cloud Automation Orchestrator
 
 ## Overview
-This project automates AWS EC2 provisioning and deletion using Python and Bash scripting.
+This project is a comprehensive, production-ready AWS automation suite built with Python and `boto3`. It automates the provisioning, lifecycle management, and clean-up of AWS resources including **EC2 instances, S3 buckets, and Lambda functions**. 
+
+It is designed with DevOps best practices in mind, featuring targeted tear-downs, custom wait intervals, automated SNS email alerting, extensive logging, and dynamic background scheduling.
 
 ## Features
-- EC2 instance creation
-- EC2 termination
-- Logging and error handling
-- Scheduled automation using cron
-- Git version control
+- **Multi-Resource Provisioning:** Dynamically provisions EC2, S3, and Lambda functions with randomized, unique identifiers.
+- **Targeted Cleanup:** Cleanly deletes specific individual resources by ID/Name, or tears down the entire stack automatically.
+- **Dynamic Scheduling:** Run the automation seamlessly in the background at custom-defined times using built-in Python scheduling.
+- **Linux Cron Support:** Fully integrated wrapper scripts (`run_automation.sh`) for seamless deployment on remote Linux servers using cron.
+- **Automated SNS Alerts:** Automatically detects success or failure across the lifecycle and dispatches structured email reports to the administrator.
+- **Robust Logging:** Maintains continuous operational logs stored locally in the `logs/automation.log` directory.
 
-## Technologies
-- Python (boto3)
-- AWS CLI
-- Bash scripting
-- Cron jobs
+## File Structure
+- **`run_automation.py`** - The primary orchestrator script. Handles CLI arguments, triggers provisioning modules, controls sleep intervals, and manages scheduling.
+- **`run_automation.sh`** - A safe bash wrapper script designed for executing the automation inside a restricted Linux cron environment.
+- **`scripts/config.py`** - Centralized configuration variables (Region, AMI IDs, IAM Roles, Admin Email).
+- **`scripts/email_alert.py`** - Handles AWS SNS integrations for administrator notifications.
+- **`scripts/logger.py`** - Dual-stream logging setup (outputs to terminal and writes to file).
+- **`scripts/create_*.py`** & **`scripts/delete_*.py`** - Modular components isolating the boto3 logic for individual AWS resources.
+- **`docs/cron_setup.md`** - Comprehensive instructions on deploying the project in a Linux scheduled environment.
 
-## Setup
+## Installation
 
-1. Install dependencies:
-   pip install -r requirements.txt
-
-2. Configure AWS:
-   aws configure
-
-3. Run:
-   bash bash/run_automation.sh
-
-## Logs
-logs/automation.log
-
-## Output
-output/sample_output.txt
-
-## Automated Scheduling Using Cron
-
-To schedule the execution of this project, you can use Linux cron. We provide a shell wrapper (`run_automation.sh`) that safely sets up the environment, executes the Python script, and logs output.
-
-**Make the script executable:**
+1. Install required dependencies:
 ```bash
-chmod +x run_automation.sh
+pip install -r requirements.txt
 ```
 
-**Example Cron Schedules (using `crontab -e`):**
+2. Ensure your AWS credentials are appropriately configured:
+```bash
+aws configure
+```
 
-- **Every 5 minutes:**
-  ```cron
-  */5 * * * * /path/to/your/project/run_automation.sh
-  ```
-- **Every day at 9 AM:**
-  ```cron
-  0 9 * * * /path/to/your/project/run_automation.sh
-  ```
-- **Every midnight:**
-  ```cron
-  0 0 * * * /path/to/your/project/run_automation.sh
-  ```
+3. Update the required IAM Role ARNs and email endpoints inside `scripts/config.py` before running.
 
-For more detailed information, troubleshooting, and best practices, see [docs/cron_setup.md](docs/cron_setup.md).
+## Usage Guide
+
+### Standard Execution
+Run the full provisioning lifecycle (Create -> Wait -> Delete):
+```bash
+python run_automation.py
+```
+
+### Custom Wait Times
+Override the default sleep interval between creation and deletion:
+```bash
+python run_automation.py --wait 60
+```
+
+### Targeted Deletion
+Bypass creation and immediately destroy specific existing resources:
+```bash
+python run_automation.py --terminate-ec2 i-1234567890abcdef0
+python run_automation.py --delete-s3 my-bucket-name
+python run_automation.py --delete-lambda my-function-name
+```
+
+### Background Scheduling
+Instruct the script to run continuously in the background and execute at a specific clock time every day:
+```bash
+# Defaults to 11:00 AM
+python run_automation.py --schedule
+
+# Run every day at 10:30 AM
+python run_automation.py --schedule 10:30
+
+# Combine schedule with a custom sleep interval
+python run_automation.py --schedule 10:30 --wait 120
+```
+
+## Logs
+Detailed operational logs are automatically generated and stored locally in `logs/automation.log`. 
