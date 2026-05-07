@@ -60,6 +60,9 @@ python run_automation.py --wait 60
 
 # Wait until exactly 2:07 PM (14:07) before deleting
 python run_automation.py --wait 14:07
+
+# You can also use --stop-time and specify seconds (HH:MM:SS)
+python run_automation.py --stop-time 14:07:30
 ```
 
 ### Targeted Deletion
@@ -78,6 +81,9 @@ python run_automation.py --schedule
 
 # Start every day at 10:30 AM
 python run_automation.py --schedule 10:30
+
+# You can also use --start-time with seconds
+python run_automation.py --start-time 14:00:00 --wait 1800
 
 # Advanced Combo: Start every day at 2:05 PM (14:05), and trigger cleanup exactly at 2:07 PM (14:07)
 python run_automation.py --schedule 14:05 --wait 14:07

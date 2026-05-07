@@ -19,16 +19,14 @@ def main():
     parser.add_argument('--ec2', action='store_true', help='Create and delete EC2 instance')
     parser.add_argument('--s3', action='store_true', help='Create and delete S3 bucket')
     parser.add_argument('--lambda-func', dest='lambda_func', action='store_true', help='Create and delete Lambda function')
-    
-    # New options for specific deletions and wait time
+
     parser.add_argument('--terminate-ec2', dest='term_ec2', help='Terminate a specific EC2 instance by ID')
     parser.add_argument('--delete-s3', dest='del_s3', help='Delete a specific S3 bucket by Name')
     parser.add_argument('--delete-lambda', dest='del_lambda', help='Delete a specific Lambda function by Name')
-    parser.add_argument('--wait', help='Override the wait time in seconds (e.g. 60) or specify a specific end time (e.g. 11:20)')
+    parser.add_argument('--wait', '--stop-time', dest='wait', help='Wait seconds (e.g. 60) or specific end time (e.g. 11:20 or 14:00:00)')
     
     args = parser.parse_args()
-    
-    # Default to running everything if no flags are provided
+
     run_all = not (args.ec2 or args.s3 or args.lambda_func)
     run_ec2 = args.ec2 or run_all
     run_s3 = args.s3 or run_all
@@ -36,8 +34,7 @@ def main():
 
     logger = setup_logger()
     logger.info("Starting AWS Automation...")
-    
-    # Direct deletion path
+
     if args.term_ec2 or args.del_s3 or args.del_lambda:
         logger.info("Executing specific targeted deletions...")
         if args.term_ec2:
@@ -53,8 +50,7 @@ def main():
     
     errors = []
     successes = []
-    
-    # 1. Create resources
+
     success_ec2 = False
     success_s3 = False
     success_lambda = False
@@ -79,14 +75,12 @@ def main():
             successes.append(f"✅ Lambda Function Created: {res_lambda}")
         else:
             errors.append(res_lambda)
-            
-    # Send success email if any succeeded
+
     if successes:
         logger.info("Sending success email alert to admin...")
         success_msg = "PROVISIONING SUCCESS!\n\nHere are the details of the resources created:\n\n" + "\n".join(successes)
         send_email(success_msg, subject="AWS Automation Alert - Provisioning Success")
-    
-    # Send failure email if anything failed
+
     if errors:
         combined_error_message = "PROVISIONING ERRORS:\n\n" + "\n\n".join(errors)
         logger.info("Sending error email alert to admin...")
@@ -96,13 +90,19 @@ def main():
         logger.info("No successful creations to clean up. Exiting.")
         return
 
-    # 2. Wait
     wait_time = WAIT_TIME_SECONDS
     if args.wait:
         if ":" in args.wait:
             from datetime import datetime
             now = datetime.now()
-            target_time = datetime.strptime(args.wait, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+            # Try HH:MM:SS first, then HH:MM
+            try:
+                target_time = datetime.strptime(args.wait, "%H:%M:%S")
+            except ValueError:
+                target_time = datetime.strptime(args.wait, "%H:%M")
+            
+            target_time = target_time.replace(year=now.year, month=now.month, day=now.day)
+            
             if target_time < now:
                 import datetime as dt
                 target_time = target_time + dt.timedelta(days=1)
@@ -112,8 +112,7 @@ def main():
             
     logger.info(f"Waiting {wait_time} seconds...")
     time.sleep(wait_time)
-    
-    # 3. Delete resources
+
     delete_errors = []
     delete_successes = []
     
@@ -140,7 +139,6 @@ def main():
     
     logger.info("Completed AWS Automation Cleanup")
     
-    # 4. Send combined email if any errors occurred during deletion
     if delete_errors:
         combined_error_message = "CLEANUP ERRORS:\n\n" + "\n\n".join(delete_errors)
         logger.info("Sending combined error email alert to admin...")
@@ -152,23 +150,28 @@ def main():
         send_email(success_msg, subject="AWS Automation Alert - Cleanup Success")
 
 if __name__ == "__main__":
+    # Check for --schedule or --start-time
+    schedule_flag = None
     if "--schedule" in sys.argv:
+        schedule_flag = "--schedule"
+    elif "--start-time" in sys.argv:
+        schedule_flag = "--start-time"
+
+    if schedule_flag:
         try:
             import schedule
         except ImportError:
             print("Please install the 'schedule' library first: pip install schedule")
             sys.exit(1)
             
-        schedule_index = sys.argv.index("--schedule")
-        schedule_time = "11:00" # default
+        schedule_index = sys.argv.index(schedule_flag)
+        schedule_time = "11:00"
         
-        # Check if the user provided a time after --schedule (like --schedule 10:33)
         if len(sys.argv) > schedule_index + 1 and not sys.argv[schedule_index + 1].startswith("--"):
             schedule_time = sys.argv[schedule_index + 1]
-            sys.argv.pop(schedule_index + 1) # remove the time string so argparse doesn't crash
+            sys.argv.pop(schedule_index + 1)
             
-        # Remove --schedule from sys.argv
-        sys.argv.remove("--schedule")
+        sys.argv.remove(schedule_flag)
             
         print(f"Scheduler started. The automation will run every day at {schedule_time}.")
         print("Keep this terminal open to run in the background.")
