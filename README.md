@@ -94,10 +94,22 @@ python run_automation.py --stop-time 14:07:30
 * **What it does:** Tells the script to stop/delete at exactly 2:07:30 PM.
 
 ### 5. Background Scheduling
+You can schedule the script to run automatically at a specific time:
+
 ```bash
 python run_automation.py --schedule 10:30
 ```
 * **What it does:** Runs the script in the background every day at 10:30 AM.
+
+```bash
+python run_automation.py --start-time 09:10 --wait 50
+```
+* **What it does:** Starts the automation at 09:10 AM, creates resources, waits for 50 seconds, and then deletes them.
+
+```bash
+python run_automation.py --schedule 14:05 --wait 14:07
+```
+* **What it does:** Starts the automation every day at 2:05 PM (14:05), and triggers the cleanup/deletion step exactly at 2:07 PM (14:07).
 
 ---
 
