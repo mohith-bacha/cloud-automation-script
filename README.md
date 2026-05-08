@@ -61,6 +61,16 @@ python run_automation.py --delete-s3 my-bucket-name
 python run_automation.py --delete-lambda my-function-name
 ```
 * **What it does:** Immediately deletes the specific resource you mention by its ID or Name. It doesn't create anything.
+* **Handling Multiple Instances:** If you have multiple EC2 instances running and want to delete a specific one:
+    * First, find the **Instance ID** of the instance you want to delete. You can find this in the AWS Console or by using the AWS CLI:
+      ```bash
+      aws ec2 describe-instances --query "Reservations[*].Instances[*].[InstanceId,State.Name]" --output table
+      ```
+    * Then, pass that specific ID to the command:
+      ```bash
+      python run_automation.py --terminate-ec2 i-1234567890abcdef0
+      ```
+    * The script will terminate **only** that specific instance, leaving other running instances safe.
 
 ### 4. Custom Wait Times
 ```bash
