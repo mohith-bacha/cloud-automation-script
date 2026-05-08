@@ -38,55 +38,79 @@ aws configure
 
 ## Usage Guide
 
-### Standard Execution
-Run the full provisioning lifecycle (Create all resources -> Wait -> Delete all):
+Here is a simple explanation of the commands you can use:
+
+### 1. Default Run (Create & Delete)
 ```bash
 python run_automation.py
 ```
+* **What it does:** This creates all resources (EC2, S3, Lambda), waits for a default time, and then deletes everything.
 
-### Target Specific Resource Creation
-If you only want to provision a specific service (instead of all three), you can use targeted flags:
+### 2. Create Specific Resources
 ```bash
 python run_automation.py --ec2
 python run_automation.py --s3
 python run_automation.py --lambda-func
 ```
+* **What it does:** Creates *only* the resource you specify (EC2, S3, or Lambda) instead of all three.
 
-### Custom Wait Times
-You can override the default sleep interval by providing a number of seconds, OR provide a specific clock time to calculate exactly when to execute the deletion step:
-```bash
-# Wait for 60 seconds before deleting
-python run_automation.py --wait 60
-
-# Wait until exactly 2:07 PM (14:07) before deleting
-python run_automation.py --wait 14:07
-
-# You can also use --stop-time and specify seconds (HH:MM:SS)
-python run_automation.py --stop-time 14:07:30
-```
-
-### Targeted Deletion
-Bypass creation entirely and immediately destroy specific existing resources:
+### 3. Delete Specific Resources (Targeted Deletion)
 ```bash
 python run_automation.py --terminate-ec2 i-1234567890abcdef0
 python run_automation.py --delete-s3 my-bucket-name
 python run_automation.py --delete-lambda my-function-name
 ```
+* **What it does:** Immediately deletes the specific resource you mention by its ID or Name. It doesn't create anything.
 
-### Background Scheduling
-Instruct the script to run continuously in the background and execute at a specific clock time every day:
+### 4. Custom Wait Times
 ```bash
-# Start every day at 11:00 AM (default)
-python run_automation.py --schedule
+python run_automation.py --wait 60
+```
+* **What it does:** Tells the script to wait for 60 seconds before deleting resources.
 
-# Start every day at 10:30 AM
+```bash
+python run_automation.py --wait 14:07
+```
+* **What it does:** Tells the script to wait until exactly 2:07 PM (14:07) before deleting resources.
+
+```bash
+python run_automation.py --stop-time 14:07:30
+```
+* **What it does:** Tells the script to stop/delete at exactly 2:07:30 PM.
+
+### 5. Background Scheduling
+```bash
 python run_automation.py --schedule 10:30
+```
+* **What it does:** Runs the script in the background every day at 10:30 AM.
 
-# You can also use --start-time with seconds
-python run_automation.py --start-time 14:00:00 --wait 1800
+---
 
-# Advanced Combo: Start every day at 2:05 PM (14:05), and trigger cleanup exactly at 2:07 PM (14:07)
-python run_automation.py --schedule 14:05 --wait 14:07
+## Git Commands Used
+
+Here are the Git commands used in this project to manage the code:
+
+```bash
+# Initialize a new Git repository (only done once)
+git init
+
+# Check the status of your files
+git status
+
+# Add all changes to be committed
+git add .
+
+# Commit the changes with a message
+git commit -m "Your commit message"
+
+# Rename the branch to main
+git branch -M main
+
+# Add the remote GitHub repository
+git remote add origin https://github.com/mohith-bacha/cloud-automation-script.git
+
+# Push the changes to GitHub
+git push -u origin main
 ```
 
 ## Logs

@@ -95,7 +95,6 @@ def main():
         if ":" in args.wait:
             from datetime import datetime
             now = datetime.now()
-            # Try HH:MM:SS first, then HH:MM
             try:
                 target_time = datetime.strptime(args.wait, "%H:%M:%S")
             except ValueError:
@@ -150,7 +149,6 @@ def main():
         send_email(success_msg, subject="AWS Automation Alert - Cleanup Success")
 
 if __name__ == "__main__":
-    # Check for --schedule or --start-time
     schedule_flag = None
     if "--schedule" in sys.argv:
         schedule_flag = "--schedule"
