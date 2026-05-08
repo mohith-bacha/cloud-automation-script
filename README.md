@@ -71,6 +71,11 @@ python run_automation.py --delete-lambda my-function-name
       python run_automation.py --terminate-ec2 i-1234567890abcdef0
       ```
     * The script will terminate **only** that specific instance, leaving other running instances safe.
+* **Waiting Before Deletion:** You can also combine targeted deletion with a wait time or specific stop time:
+  ```bash
+  python run_automation.py --terminate-ec2 i-1234567890abcdef0 --wait 11:40
+  ```
+  * **What it does:** This will wait until 11:40 AM (or the specified time/seconds) and *then* delete the specific instance.
 
 ### 4. Custom Wait Times
 ```bash

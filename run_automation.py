@@ -35,7 +35,33 @@ def main():
     logger = setup_logger()
     logger.info("Starting AWS Automation...")
 
+    def handle_wait(args, logger):
+        wait_time = WAIT_TIME_SECONDS
+        if args.wait:
+            if ":" in args.wait:
+                from datetime import datetime
+                now = datetime.now()
+                try:
+                    target_time = datetime.strptime(args.wait, "%H:%M:%S")
+                except ValueError:
+                    target_time = datetime.strptime(args.wait, "%H:%M")
+                
+                target_time = target_time.replace(year=now.year, month=now.month, day=now.day)
+                
+                if target_time < now:
+                    import datetime as dt
+                    target_time = target_time + dt.timedelta(days=1)
+                wait_time = int((target_time - now).total_seconds())
+            else:
+                wait_time = int(args.wait)
+                
+        logger.info(f"Waiting {wait_time} seconds...")
+        time.sleep(wait_time)
+
     if args.term_ec2 or args.del_s3 or args.del_lambda:
+        if args.wait:
+            handle_wait(args, logger)
+            
         logger.info("Executing specific targeted deletions...")
         if args.term_ec2:
             res = delete_ec2(args.term_ec2)
@@ -90,27 +116,7 @@ def main():
         logger.info("No successful creations to clean up. Exiting.")
         return
 
-    wait_time = WAIT_TIME_SECONDS
-    if args.wait:
-        if ":" in args.wait:
-            from datetime import datetime
-            now = datetime.now()
-            try:
-                target_time = datetime.strptime(args.wait, "%H:%M:%S")
-            except ValueError:
-                target_time = datetime.strptime(args.wait, "%H:%M")
-            
-            target_time = target_time.replace(year=now.year, month=now.month, day=now.day)
-            
-            if target_time < now:
-                import datetime as dt
-                target_time = target_time + dt.timedelta(days=1)
-            wait_time = int((target_time - now).total_seconds())
-        else:
-            wait_time = int(args.wait)
-            
-    logger.info(f"Waiting {wait_time} seconds...")
-    time.sleep(wait_time)
+    handle_wait(args, logger)
 
     delete_errors = []
     delete_successes = []
